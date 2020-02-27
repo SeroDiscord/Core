@@ -1,0 +1,11 @@
+{
+  "name": "WULFERS-AWESUMZ-BOT",
+  "version": "0.1",
+  "description": "WULFERS AWESUMZ BOT DIDNT YOU READ THE TITLE?",
+  "main": "bot.js",
+  "author": "inconsiderate & cim",
+  "dependencies": {
+    "discord.js": "^11.5.1",
+    "dotenv": "^8.2.0"
+  }
+}
