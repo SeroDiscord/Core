@@ -10,17 +10,5 @@
 		"failed_calls":false,
 		"successful_calls":false,
 		"full_call_context":false
-	},
-	"activity_log":{
-		"voice_loops":false,
-		"text_entry":false
-	},
-	"countdown":{
-		"game_initiate":false,
-		"game_end":false
-	},
-	"announce_vc": {
-		"add_to_db":true,
-		"vcuserlist":false
 	}
 }
