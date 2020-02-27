@@ -244,11 +244,12 @@ function call_command(info, cmd, msg) {
 	}
 	info['cmd'] = cmd;
 	info['msg'] = msg;
-	setTimeout(() => {
+	new Promise((resolve, reject) => {
 		let hrstart = process.hrtime();
 		info.bot.cmd[info['cmd']](info);
 		if (verbose.commands.successful_calls) console.log('Single Message Command %d : %d', i, process.hrtime(hrstart)[1] / 1000000);
-	},0);
+		resolve();
+	});
 }
 
 function load_modules(bot) {
@@ -256,11 +257,12 @@ function load_modules(bot) {
 	let modules = fs.readdirSync(MODULES_DIR);
 	
 	for (let i in modules) {
-		setTimeout(() => {
+		new Promise((resolve, reject) => {
 			mod = require('./' + MODULES_DIR + '/' + modules[i]);
 			console.log('./' + MODULES_DIR + '/' + modules[i]);
 			mod.declare(bot);
-		},0);
+			resolve();
+		});
 	}
 }
 
@@ -279,11 +281,12 @@ bot.on('guildMemberUpdate', (olduser, user) => {
 		"throwErr"	:throwErr
 	};
 	for (let i in bot.guild_member_update) {
-		setTimeout(() => {
+		new Promise((resolve, reject) => {
 			let hrstart = process.hrtime();
 			bot.guild_member_update[i](info);
 			if (verbose.memberupdate) console.log('[%d] Guild Member Update Module # %d : %d', new Date() / 60000, i, process.hrtime(hrstart)[1] / 1000000);
-		},0)
+			resolve();
+		})
 	}
 });
 
@@ -300,11 +303,12 @@ bot.on('guildMemberAdd', user => {
 		"throwErr"	:throwErr
 	};
 	for (let i in bot.guild_member_join) {
-		setTimeout(() => {
+		new Promise((resolve, reject) => {
 			let hrstart = process.hrtime();
 			bot.guild_member_join[i](info);
 			if (verbose.memberadd) console.log('[%d] Guild Member Add Module # %d : %d', new Date() / 60000, i, process.hrtime(hrstart)[1] / 1000000);
-		},0)
+			resolve();
+		})
 	}
 });
 
@@ -321,11 +325,12 @@ bot.on('voiceStateUpdate', user => {
 		"throwErr"	:throwErr
 	};
 	for (let i in bot.voicechat_updates) {
-		setTimeout(() => {
+		new Promise((resolve, reject) => {
 			let hrstart = process.hrtime();
 			bot.voicechat_updates[i](info);
 			if (verbose.voice) console.log('[%d] Voice Chat Module # %d : %d', new Date() / 60000, i, process.hrtime(hrstart)[1] / 1000000);
-		},0)
+			resolve();
+		})
 	}
 });
 
@@ -343,11 +348,12 @@ function on_active_modules(bot,timeToCheckMS) {
 	};
 	for (let i in bot.active) {
 		if (timeToCheckMS%(time_betweeen_check*bot.active[i][0]) == bot.active[i][2]) {
-			setTimeout(() => {
+			new Promise((resolve, reject) => {
 				let hrstart = process.hrtime();
 				bot.active[i][1](info);
 				if (verbose.active) console.log('[%d] Active Module # %d : %d', new Date() / 60000, i, process.hrtime(hrstart)[1] / 1000000);
-			},0);
+				resolve();
+			});
 		}
 	}
 	now = new Date().getTime();
@@ -375,32 +381,35 @@ bot.on('messageReactionAdd', (reaction,user) => {
 	// message specific commands
 	if (bot.reactionadd_single_message[reaction.message.id] !== undefined) {
 		for (i in bot.reactionadd_single_message[reaction.message.id]) {
-			setTimeout(() => {
+			new Promise((resolve, reject) => {
 				let hrstart = process.hrtime();
 				bot.reactionadd_single_message[reaction.message.id][i];
 				if (verbose.commands.successful_calls) console.log('ReactionAdd Single Message Command %d : %d', i, process.hrtime(hrstart)[1] / 1000000);
-			},0);
+				resolve();
+			});
 		}
 	}
 	
 	// channel specific commands
 	if (bot.reactionadd_channel[reaction.message.channel.id] !== undefined){
 		for (i in bot.reactionadd_channel[reaction.message.channel.id]) {
-			setTimeout(() => {
+			new Promise((resolve, reject) => {
 				let hrstart = process.hrtime();
 				bot.reactionadd_channel[reaction.message.channel.id][i](info);
 				if (verbose.commands.successful_calls) console.log('ReactionAdd Channel Command %d : %d', i, process.hrtime(hrstart)[1] / 1000000);
-			},0);
+				resolve();
+			});
 		}
 	}
 	
 	// passive commands
 	for (i in bot.reactionadd_passive) {
-		setTimeout(() => {
+		new Promise((resolve, reject) => {
 			let hrstart = process.hrtime();
 			bot.reactionadd_passive[i](info)
 			if (verbose.commands.successful_calls) console.log('ReactionAdd Passive Command %d : %d', i, process.hrtime(hrstart)[1] / 1000000);
-		},0);
+			resolve();
+		});
 	}
 });
 
@@ -445,21 +454,23 @@ bot.on('message', msg => {
 	// channel specific commands
 	if (bot.channel[msg.channel.id] !== undefined){
 		for (i in bot.channel[msg.channel.id]) {
-			setTimeout(() => {
+			new Promise((resolve, reject) => {
 				let hrstart = process.hrtime();
 				bot.channel[msg.channel.id][i](info);
 				if (verbose.commands.successful_calls) console.log('Channel Command %d : %d', i, process.hrtime(hrstart)[1] / 1000000);
-			},0);
+				resolve();
+			});
 		}
 	}
 	
 	// passive commands
 	for (i in bot.passive) {
-		setTimeout(() => {
+		new Promise((resolve, reject) => {
 			let hrstart = process.hrtime();
 			bot.passive[i](info);
 			if (verbose.commands.successful_calls) console.log('Passive Command %d : %d', i, process.hrtime(hrstart)[1] / 1000000);
-		},0);
+			resolve();
+		});
 	}
 });
 
