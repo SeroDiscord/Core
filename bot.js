@@ -57,7 +57,6 @@ bot.on('message', message => {
                     const reaction = collected.first();
                     
                     player = {
-                        id: `${message.guild.id}-${message.author.id}`,
                         user: message.author.id,
                         guild: message.guild.id,
                         level: 1,
@@ -80,20 +79,19 @@ bot.on('message', message => {
 
     // command QUEST
     if (command == 'quest' ) {
-
         const player = bot.getPlayerByUserAndGuild.get(message.author.id, message.guild.id);
-        if (!player) noPlayerFound();
+        if (player == undefined) noPlayerFound(message);
         
         let currentQuest = bot.getPlayerQuestByPlayerId.get(player.id); 
         if (currentQuest) {
-            // TODO: questStatus(player, currentQuest); if player is currently on a quest, show time remaining
+            questStatus(player, currentQuest, message);
             return;
         }
 
         // get player level and determine quest difficulty
         // below should become a proper formula later (based on factors like level and gear and how many pokemon you have or something)
-        const easyQuest = bot.getRandomQuestByDifficulty.get(player.level - 1);
-        const normalQuest = bot.getRandomQuestByDifficulty.get(player.level);
+        const easyQuest = bot.getRandomQuestByDifficulty.get(player.level);
+        const normalQuest = bot.getRandomQuestByDifficulty.get(player.level + 1);
         const hardQuest = bot.getRandomQuestByDifficulty.get(player.level + 2);
 
         const quests = {
@@ -103,7 +101,9 @@ bot.on('message', message => {
         }
 
         // present player with quest option "easy, normal, hard"
-        message.reply('choose your quest difficulty!\n🐭 Wimpy Quest \n🙍 Normal Quest \n☠️ You Gonna Die').then( sentMessage => {
+        const questText = `choose your quest difficulty!\n🐭 Wimpy Quest - ${easyQuest.description}\n🙍 Normal Quest - ${normalQuest.description}\n☠️ You Gonna Die - ${hardQuest.description}`;
+
+        message.reply(questText).then( sentMessage => {
             sentMessage.react('🐭')
                 .then(() => sentMessage.react('🙍'))
                 .then(() => sentMessage.react('☠️'))
@@ -120,12 +120,18 @@ bot.on('message', message => {
         
                 let emojiChoice = helpers.getKeyByValue(quests,reaction.emoji.name);
                 var now = moment();
-                var then = moment().add(2, 'minutes');
+                var then = moment().add(normalQuest.difficulty * player.level, 'minutes');
                 var duration = moment.duration(now.diff(then)).humanize();
 
                 // save current quest to db
-                // bot.setPlayerQuest.run(normalQuest.id, player.id, then.unix());
-                message.reply(`Your ${reaction.emoji.name} ${emojiChoice} quest has begun! Time remaining: ${duration}`);
+                playerQuest = {
+                    playerId: player.id,
+                    questId: normalQuest.id,
+                    endTime: then.unix()
+                }
+
+                bot.setPlayerQuest.run(playerQuest);
+                message.reply(`your ${reaction.emoji.name} ${emojiChoice} quest has begun! Time remaining: ${duration}`);
             })
             .catch(collected => {
                 message.reply('you did not reply in time!');
@@ -135,16 +141,24 @@ bot.on('message', message => {
     }
 });
 
-questStatus = (player, currentQuest) => {
-    var now = moment();
-    var then = moment().add(2, 'minutes');
-    var duration = moment.duration(now.diff(then)).humanize();
-    // returns duration object with the duration between x and y
-    console.log(duration);
+questStatus = (player, currentQuest, message) => {
+    let expiry = moment.unix(currentQuest.endTime);
+    let expiration = expiry.isAfter();
+    let quest = bot.getQuestById.get(currentQuest.questId);
+
+    if (!expiration) {
+        // TODO: quest complete messaging and rewards system??
+        message.reply(`Your quest is complete!\nSorry, you're dead.`)   
+
+    } else {
+        let now = moment();
+        let duration = moment.duration(expiry.diff(now)).humanize(true);
+        message.reply(`\"${quest.description}\" will be finished ${duration}`)    
+    }
 
     return;
 };
 
-noPlayerFound = () => {
+noPlayerFound = (message) => {
     message.reply("you don't have a character! Type !start to get started.")
 }

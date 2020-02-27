@@ -25,7 +25,7 @@ players = (bot) => {
     
     // setters and getters for "players" table
     bot.getPlayerByUserAndGuild = sql.prepare("SELECT * FROM players WHERE user = ? AND guild = ?");
-    bot.setPlayer = sql.prepare("INSERT OR REPLACE INTO players (id, user, guild, level, exp, class) VALUES (@id, @user, @guild, @level, @exp, @class);");
+    bot.setPlayer = sql.prepare("INSERT OR REPLACE INTO players (user, guild, level, exp, class) VALUES (@user, @guild, @level, @exp, @class);");
 }
 
 playerQuests = (bot) => {
