@@ -3,7 +3,7 @@
  * Please try not to hardcode message or channel IDs
  * All mentions of string are IDs unless mentioned otherwise
  * All functions are a callback unless specified otherwise
- * 
+ *
  * The bot object in subordinate modules contains:
  *  {
  *      sql     // just the sqlite object
@@ -20,17 +20,17 @@
  *      add_command(bot,string,callback)    // occurs when someone uses a command matching the string parameter. String is not an ID, but a command name, eg '!ping' would be added as the string "ping"
  *
  *       add_voiceevent(bot,function)        // occurs when a user's voice status updates (joins/changes channel, mute/unmute)
- * 
+ *
  *      add_guild_member_join(bot,function)     // occurs when a user joins the guild
  *      add_guild_member_update(bot,function)   // occurs when a member updates nickname, changes role, etc
- * 
+ *
  *      call_command(info,string,string)       // calls a command, accepts a command name for the first string, and message contents for the second - could be used for testing, but haven't done so
  *  }
- * 
+ *
  * Regarding "info" objects
  *      // they will never contain conflicting variable names
  *          e.g. "user" in one will mean the exact same thing as "user" in any other
- * 
+ *
  * info objects contain:
  * from active:
  *  {
@@ -64,7 +64,7 @@
  *      message
  *      cmd     // the command being called
  *      msg     // the *line* of message subsequent the prefix and command
- *  }   
+ *  }
  ***    each command from each line will be broken up if there's multiple lines of commands
  ***    for example:
  ***        !ping 1 2
@@ -90,15 +90,17 @@
  *      user
  *      olduser     // the user object from before the update
  *  }
- * 
+ *
  *******************************/
 
-
-const config = require('./config.json');
+const config = require('./config/config.json');
 const Discord = require('discord.js');
-const SQLite = require("better-sqlite3");
+const db = require('./models');
 const verbose = require('./verbose.json');
 const fs = require("fs");
+
+// initialize database tables
+db.sequelize.sync();
 
 //default bot admins
 const BOT_ADMINS = ['146365826939748353','642108520858386452','107901991283339264'];
@@ -124,31 +126,32 @@ bot.once('ready', () => {
 	error_count = 0;
 	console.log(`Logged in as ${bot.user.tag}!`);
 	if (verbose.setup.bot_info) console.log(`Bot User ID: ${bot.user.id}`);
-	
+
 	//initialize the bot
 	bot.active = [];
-	
+
 	bot.passive = [];
 	bot.channel = {};
-	
+
 	bot.reactionadd_passive = [];
 	bot.reactionadd_single_message = {};
 	bot.reactionadd_channel = {};
-	
+
 	bot.voicechat_updates = [];
 	bot.guild_member_join = [];
 	bot.guild_member_update = [];
 
-	bot['cmd'] = [];
-	
-	bot.admins = [];
-	bot.sql.prepare("CREATE TABLE IF NOT EXISTS admins (id CHAR(18));").run();
-	let adminsresult = bot.sql.prepare("SELECT id FROM admins;").all();
-	if (adminsresult.length == 0) {
-		bot.sql.prepare(`INSERT INTO admins (id) VALUES (${BOT_ADMINS.join("), (")});`).run();
-		adminsresult = bot.sql.prepare("SELECT id FROM admins;").all();
-	}
-	for (i in adminsresult) bot.admins.push(adminsresult[i]['id']);
+    bot['cmd'] = [];
+
+	bot.admins = db.Admin.findAll().results;
+
+    // bot.sql.prepare("CREATE TABLE IF NOT EXISTS admins (id CHAR(18));").run();
+	// let adminsresult = bot.sql.prepare("SELECT id FROM admins;").all();
+	// if (adminsresult.length == 0) {
+	// 	bot.sql.prepare(`INSERT INTO admins (id) VALUES (${BOT_ADMINS.join("), (")});`).run();
+	// 	adminsresult = bot.sql.prepare("SELECT id FROM admins;").all();
+	// }
+	// for (i in adminsresult) bot.admins.push(adminsresult[i]['id']);
 
 	/*bot.sql.query("CREATE TABLE IF NOT EXISTS admins (id CHAR(18));", function (createerr, createresult) {
         if (createerr) throw createerr;
@@ -159,10 +162,10 @@ bot.once('ready', () => {
 			if (verbose) console.log('Admins: %j',bot.admins);
 		});
 	});*/
-	
+
 	//add activity handlers
 	bot.add_active = add_active;
-	
+
 	//add event handlers
 	bot.remove_reactionadd_single_message = remove_reactionadd_single_message;
 	bot.add_reactionadd_single_message = add_reactionadd_single_message;
@@ -175,7 +178,7 @@ bot.once('ready', () => {
 	bot.add_guild_member_join = add_guild_member_join;
 	bot.add_guild_member_update = add_guild_member_update;
 	bot.call_command = call_command;
-	
+
 	//add modules
 	load_modules(bot);
 	let now = new Date().getTime();
@@ -269,7 +272,7 @@ function call_command(info, cmd, msg) {
 function load_modules(bot) {
 	bot.cmd = {};
 	let modules = fs.readdirSync(MODULES_DIR).filter(word => word.endsWith(".js"));
-	
+
 	for (let i in modules) {
 		new Promise((resolve, reject) => {
 			mod = require('./' + MODULES_DIR + '/' + modules[i]);
@@ -401,7 +404,7 @@ bot.on('messageReactionAdd', (reaction,user) => {
 			resolve();
 		});
 	}
-	
+
 	// channel specific commands
 	if (bot.reactionadd_channel[reaction.message.channel.id] !== undefined){
 		for (i in bot.reactionadd_channel[reaction.message.channel.id]) {
@@ -413,7 +416,7 @@ bot.on('messageReactionAdd', (reaction,user) => {
 			});
 		}
 	}
-	
+
 	// passive commands
 	for (i in bot.reactionadd_passive) {
 		new Promise((resolve, reject) => {
@@ -432,7 +435,7 @@ if (verbose.emitter) console.log('emitter');
 bot.on('message', msg => {
 	//don't respond to ourselves
 	if (msg.author.id === bot.user.id) return;
-	
+
 	let info = {
 		"bot"	    :bot,
 		"message"	:msg,
@@ -440,7 +443,7 @@ bot.on('message', msg => {
 		"throwErr"	:throwErr,
 		"verbose"	:verbose,
 	}
-	
+
 	// specific commands
 	if (msg.content.charAt(0) == config.prefix) {
 		// only use msg for contents in modules, message may contain multiple lines
@@ -462,7 +465,7 @@ bot.on('message', msg => {
 			}
 		}
 	}
-	
+
 	// channel specific commands
 	if (bot.channel[msg.channel.id] !== undefined){
 		for (i in bot.channel[msg.channel.id]) {
@@ -474,7 +477,7 @@ bot.on('message', msg => {
 			});
 		}
 	}
-	
+
 	// passive commands
 	for (i in bot.passive) {
 		new Promise((resolve, reject) => {
@@ -494,7 +497,5 @@ bot.on('error', error => {
 	if (error_count < 5) bot.login(config.token);
 	if (error_count >= 5) setTimeout(() => {bot.login(config.token);},30000);
 });
-
-bot.sql = new SQLite('./wolf-game.sqlite');
 
 bot.login(config.token);
