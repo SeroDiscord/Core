@@ -7,15 +7,23 @@
  * The bot object in subordinate modules contains:
  *  {
  *      sql     // just the sqlite object
+ *
  *      add_active(bot,function,integer,integer)        // occurs once every minute, first integer is intervals (minutes) between function call, second is minutes to offset by. To have a command occur every hour on the 5th minute you'd have those set to 60,4
+ *
+ * 		remove_reactionadd_single_message(bot,string)	// removes the single-message tied reaction callback
  *      add_reactionadd_single_message(bot,string,function)  // occurs when someone reacts to a message with a matching ID
  *      add_reactionadd_channel(bot,string,function)   // occurs when someone reacts to a message in a channel with a matching ID
+ *      add_reactionadd_passive(bot,string,function)   // occurs when someone reacts to any message
+ *
  *      add_channel(bot,string,function)    // occurs when someone speaks in a channel with a matching ID
  *      add_passive(bot,string,callback)    // occurs when someone speaks in any channel, indiscriminately
  *      add_command(bot,string,callback)    // occurs when someone uses a command matching the string parameter. String is not an ID, but a command name, eg '!ping' would be added as the string "ping"
- *      add_voiceevent(bot,function)        // occurs when a user's voice status updates (joins/changes channel, mute/unmute)
+ *
+ *       add_voiceevent(bot,function)        // occurs when a user's voice status updates (joins/changes channel, mute/unmute)
+ * 
  *      add_guild_member_join(bot,function)     // occurs when a user joins the guild
  *      add_guild_member_update(bot,function)   // occurs when a member updates nickname, changes role, etc
+ * 
  *      call_command(info,string,string)       // calls a command, accepts a command name for the first string, and message contents for the second - could be used for testing, but haven't done so
  *  }
  * 
@@ -156,6 +164,7 @@ bot.once('ready', () => {
 	bot.add_active = add_active;
 	
 	//add event handlers
+	bot.remove_reactionadd_single_message = remove_reactionadd_single_message;
 	bot.add_reactionadd_single_message = add_reactionadd_single_message;
 	bot.add_reactionadd_channel = add_reactionadd_channel;
 	bot.add_reactionadd_passive = add_reactionadd_passive;
@@ -200,6 +209,11 @@ function add_reactionadd_single_message(bot, id, cb) {
 	}
 	bot.reactionadd_single_message[id] = cb
 	if (verbose.setup.add_commands) console.log('Single Message ReactionAdd Command Added %s, length:%d',id,Object.keys(bot.reactionadd_single_message).length);
+}
+
+function remove_reactionadd_single_message(bot, id) {
+	delete bot.reactionadd_single_message[id];
+	if (verbose.setup.add_commands) console.log('Single Message ReactionAdd Command Removed %s, length:%d',id,Object.keys(bot.reactionadd_single_message).length);
 }
 
 function add_reactionadd_channel(bot, id, cb) {
@@ -373,21 +387,19 @@ bot.on('messageReactionAdd', (reaction,user) => {
 		"bot"   	:bot,
 		"reaction"	:reaction,
         "admin"		:bot.admins.includes(user.id),
-        "user"      :reaction.user,
+        "user"      :user,
 		"throwErr"	:throwErr,
 		"verbose"	:verbose,
 	}
-	
+
 	// message specific commands
 	if (bot.reactionadd_single_message[reaction.message.id] !== undefined) {
-		for (i in bot.reactionadd_single_message[reaction.message.id]) {
-			new Promise((resolve, reject) => {
-				let hrstart = process.hrtime();
-				bot.reactionadd_single_message[reaction.message.id][i];
-				if (verbose.commands.successful_calls) console.log('ReactionAdd Single Message Command %d : %d', i, process.hrtime(hrstart)[1] / 1000000);
-				resolve();
-			});
-		}
+		new Promise((resolve, reject) => {
+			let hrstart = process.hrtime();
+			bot.reactionadd_single_message[reaction.message.id](info);
+			if (verbose.commands.successful_calls) console.log('ReactionAdd Single Message Command %d : %d', i, process.hrtime(hrstart)[1] / 1000000);
+			resolve();
+		});
 	}
 	
 	// channel specific commands
