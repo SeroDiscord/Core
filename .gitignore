@@ -5,3 +5,5 @@
 *.sqlite-wal
 config.json
 wulfers.log
+.gitignore
+*simpleimagebasedgame*

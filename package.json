@@ -7,6 +7,7 @@
   "dependencies": {
     "better-sqlite3": "^6.0.1",
     "discord.js": "^11.5.1",
+    "jimp": "^0.9.3",
     "moment": "^2.24.0",
     "node-gyp": "^6.1.0",
     "pm2": "^4.2.3"

@@ -254,7 +254,7 @@ function call_command(info, cmd, msg) {
 
 function load_modules(bot) {
 	bot.cmd = {};
-	let modules = fs.readdirSync(MODULES_DIR);
+	let modules = fs.readdirSync(MODULES_DIR).filter(word => word.endsWith(".js"));
 	
 	for (let i in modules) {
 		new Promise((resolve, reject) => {
