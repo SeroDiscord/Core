@@ -6,3 +6,4 @@
 config.json
 wulfers.log
 .gitignore
+.DS_Store
