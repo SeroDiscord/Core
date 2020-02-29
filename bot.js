@@ -96,14 +96,13 @@
 const config = require('./config/config.json');
 const Discord = require('discord.js');
 const db = require('./models');
+const sequelize_fixtures = require('sequelize-fixtures');
 const verbose = require('./verbose.json');
 const fs = require("fs");
 
 // initialize database tables
 db.sequelize.sync();
-
-//default bot admins
-const BOT_ADMINS = ['146365826939748353','642108520858386452','107901991283339264'];
+sequelize_fixtures.loadFile('./config/fixtures.json', db);
 
 // Initialize Discord Bot
 const MODULES_DIR = "modules";
@@ -142,8 +141,11 @@ bot.once('ready', () => {
 	bot.guild_member_update = [];
 
     bot['cmd'] = [];
+    bot.admins = [];
 
-	bot.admins = db.Admin.findAll().results;
+    db.Admin.findAll({attributes: ['id']}).then(function (list) {
+    	for (i in list) bot.admins.push(list[i].id);
+    });
 
     // bot.sql.prepare("CREATE TABLE IF NOT EXISTS admins (id CHAR(18));").run();
 	// let adminsresult = bot.sql.prepare("SELECT id FROM admins;").all();
