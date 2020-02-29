@@ -95,7 +95,7 @@
 
 const config = require('./config/config.json');
 const Discord = require('discord.js');
-const db = require('./models');
+db = require('./models');
 const sequelize_fixtures = require('sequelize-fixtures');
 const verbose = require('./verbose.json');
 const fs = require("fs");

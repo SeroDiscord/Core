@@ -3,29 +3,23 @@ module.exports = (sequelize, DataTypes) => {
 		id: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
-			primaryKey: true,
-			autoIncrement: true
-		},
-		discordId: {
-			type: DataTypes.INTEGER,
-			allowNull: true
-		},
+            primaryKey: true
+        },
 		level: {
 			type: DataTypes.INTEGER,
-			allowNull: false
-		},
-		class: {
-			type: DataTypes.STRING,
-			allowNull: false
+			allowNull: false,
+            defaultValue: 1,
 		},
 		exp: {
 			type: DataTypes.INTEGER,
-			allowNull: false
-		},
+			allowNull: false,
+            defaultValue: 0
+        },
 		health: {
 			type: DataTypes.INTEGER,
-			allowNull: false
-		},
+			allowNull: false,
+            defaultValue: 50,
+        },
 		createdAt: {
 			type: DataTypes.DATE,
 			allowNull: false,
@@ -39,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
 	}, {
 		tableName: 'Player',
 		timestamps: false
-	});
+    });
 
 	return Player;
 };
