@@ -10,7 +10,7 @@ const createAdmins = () => {
         if (!admins.length) {
             console.log('No admins found. Creating admins...')
             db.Admin.bulkCreate([
-                {id: '146365826939748353'}, // incon
+                {id: '146365826939748350'}, // incon test server
                 {id: '642108520858386452'},
                 {id: '107901991283339264'}
             ])
@@ -25,7 +25,7 @@ const createPlayers = () => {
         if (!players.length) {
             console.log('No players found. Creating players...')
             db.Player.bulkCreate([
-                {id: '146365826939748353', JobId: 1}, // incon
+                {id: '146365826939748350', JobId: 1}, // incon test server
                 {id: '642108520858386452', JobId: 2},
                 {id: '107901991283339264', JobId: 3}
             ])

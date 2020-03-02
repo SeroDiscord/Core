@@ -5,8 +5,8 @@ module.exports = {
 }
 
 function start(info) {
-        db.Player.findOne({where: {id: info.message.author.id}}).then(function (player) {
-        if (!player.length) {
+    db.Player.findOne({where: {id: info.message.author.id}}).then(function (player) {
+        if (!player) {
 
             // fetch all available Job options
             db.Job.findAll({attributes: ['name', 'emoji']}, {raw: true}).then(function (jobs) {
@@ -21,7 +21,7 @@ function start(info) {
 
                 info.message.channel.send("Please select your Job:\n" + jobText).then( message => {
                     // add all Job icons as reactions
-                    addMultipleReactions(message, jobIcons)
+                    helper.addMultipleReactions(message, jobIcons)
                     // wait for player to choose a reaction
                     const filter = (reaction, user) => {
                         return jobIcons.includes(reaction.emoji.name) && user.id === info.message.author.id;
@@ -32,28 +32,14 @@ function start(info) {
                         createNewPlayer(info, collected.first()); return;
                     })
                     .catch(collected => {
-                        message.reply('you did not reply in time!');
+                        info.message.channel.send('you did not reply in time!');
                     });
                 })
             })
         } else {
-            info.message.channel.reply("you have already made a character!"); return;
+            info.message.channel.send("you have already made a character!"); return;
         }
     });
-}
-
-function addMultipleReactions(message, reactions) {
-    reactions.reduce(
-        function reducer(promiseChain, value) {
-            var nextLink = promiseChain.then(
-                function() {
-                    return(message.react(value))
-                }
-            );
-            return(nextLink);
-        },
-        Promise.resolve(null)
-    );
 }
 
 function createNewPlayer(info, reaction) {
