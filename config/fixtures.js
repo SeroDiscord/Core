@@ -14,7 +14,7 @@ const createAdmins = () => {
                 {id: '642108520858386452'},
                 {id: '107901991283339264'}
             ])
-            .then((newAdmins) => {console.log('New admins: ' + newAdmins)})
+            .then((newAdmins) => {console.log('New admins created.')})
             .catch((err) => {console.log("Admin creation error : ", err)})
         }
     })
@@ -29,7 +29,7 @@ const createPlayers = () => {
                 {id: '642108520858386452', JobId: 2},
                 {id: '107901991283339264', JobId: 3}
             ])
-            .then((newPlayers) => {console.log('New players: ' + newPlayers)})
+            .then((newPlayers) => {console.log('New players created.')})
             .catch((err) => {console.log("Player creation error : ", err)})
         }
     })
@@ -40,11 +40,11 @@ const createJobs = () => {
         if (!jobs.length) {
             console.log('No jobs found. Creating jobs...')
             db.Job.bulkCreate([
-                {title: 'Blood Mage', emoji: '🩸'},
-                {title: 'Space Cowboy', emoji: '🤠'},
-                {title: 'Shapeshifter', emoji: '👺'}
+                {name: 'Blood Mage', emoji: '🩸'},
+                {name: 'Space Cowboy', emoji: '🤠'},
+                {name: 'Shapeshifter', emoji: '👺'}
             ])
-            .then((newJobs) => {console.log('New jobs: ' + newJobs)})
+            .then((newJobs) => {console.log('New jobs created.')})
             .catch((err) => {console.log("Job creation error : ", err)})
         }
     })

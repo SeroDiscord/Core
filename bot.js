@@ -102,17 +102,16 @@ const fs = require("fs");
 
 // initialize database tables
 db.sequelize.sync();
-fixtures.execute();
 
 // Initialize Discord Bot
 const MODULES_DIR = "modules";
 const bot = new Discord.Client();
 
 function throwErr(err) {
-	if (err && debug) {
-		throw err;
+    if (err && debug) {
+        throw err;
 	} else if (err) {
-		console.log(err);
+        console.log(err);
 	}
 }
 //make sure there's a module dir and make it if need be
@@ -122,7 +121,7 @@ if (!fs.existsSync(MODULES_DIR)){
 
 if (verbose.emitter) console.log('emitter');
 bot.once('ready', () => {
-	error_count = 0;
+    error_count = 0;
 	console.log(`Logged in as ${bot.user.tag}!`);
 	if (verbose.setup.bot_info) console.log(`Bot User ID: ${bot.user.id}`);
 
@@ -143,6 +142,7 @@ bot.once('ready', () => {
     bot['cmd'] = [];
     bot.admins = [];
 
+    fixtures.execute();
     db.Admin.findAll({attributes: ['id']}).then(function (list) {
     	for (i in list) bot.admins.push(list[i].id);
     });
