@@ -18,8 +18,8 @@ function start(info) {
                     jobIcons.push(jobs[job].emoji);
                     jobText += jobs[job].emoji + ' - ' + jobs[job].name + '\n';
                 }
-
-                info.message.channel.send("Please select your Job:\n" + jobText).then( message => {
+                info.message.channel.send(new Discord.RichEmbed().addField("Please select your Job: \n", jobText))
+                .then( message => {
                     // add all Job icons as reactions
                     helper.addMultipleReactions(message, jobIcons)
                     // create new player with selected job
@@ -44,7 +44,6 @@ function createNewPlayer(info, reaction) {
         .then((newPlayer) => {
             console.log("New player created:", newPlayer.id);
             info.message.channel.send(`${info.message.author.tag} is a level 1 ${selectedJob.emoji}${selectedJob.name}! Good luck out there!`);
-            // TODO: post welcome/help text
         })
     })
 

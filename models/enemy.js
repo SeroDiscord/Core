@@ -1,26 +1,16 @@
 module.exports = (sequelize, DataTypes) => {
-	const Player = sequelize.define('Player', {
+	const Enemy = sequelize.define('Enemy', {
 		id: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
-            primaryKey: true
+            primaryKey: true,
+			autoIncrement: true
         },
-		level: {
-			type: DataTypes.INTEGER,
-			allowNull: false,
-            defaultValue: 1,
-		},
-		exp: {
-			type: DataTypes.INTEGER,
-			allowNull: false,
-            defaultValue: 0
+		name: {
+			type: DataTypes.STRING,
+			allowNull: false
         },
-		max_health: {
-			type: DataTypes.INTEGER,
-			allowNull: false,
-            defaultValue: 50,
-        },
-		current_health: {
+		health: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
             defaultValue: 50,
@@ -46,9 +36,9 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue: DataTypes.NOW
 		}
 	}, {
-		tableName: 'Player',
+		tableName: 'Enemy',
 		timestamps: false
     });
 
-	return Player;
+	return Enemy;
 };
