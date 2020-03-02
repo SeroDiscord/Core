@@ -22,18 +22,11 @@ function start(info) {
                 info.message.channel.send("Please select your Job:\n" + jobText).then( message => {
                     // add all Job icons as reactions
                     helper.addMultipleReactions(message, jobIcons)
-                    // wait for player to choose a reaction
-                    const filter = (reaction, user) => {
-                        return jobIcons.includes(reaction.emoji.name) && user.id === info.message.author.id;
-                    };
+                    // create new player with selected job
 
-                    message.awaitReactions(filter, { max: 1, time: 30000, errors: ['time'] })
-                    .then(collected => {
-                        createNewPlayer(info, collected.first()); return;
+                    helper.collectFirstReaction(info, message, jobIcons).then((collectedReaction) => {
+                        createNewPlayer(info, collectedReaction); return;
                     })
-                    .catch(collected => {
-                        info.message.channel.send('you did not reply in time!');
-                    });
                 })
             })
         } else {
