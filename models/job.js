@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
 	});
 
     Job.associate = function(models) {
-        Job.hasMany(models.Player, {as: "job"})
+        Job.hasMany(models.Player)
     };
 
 	return Job;

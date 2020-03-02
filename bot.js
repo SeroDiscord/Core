@@ -96,13 +96,13 @@
 const config = require('./config/config.json');
 const Discord = require('discord.js');
 db = require('./models');
-const sequelize_fixtures = require('sequelize-fixtures');
+const fixtures = require('./config/fixtures.js');
 const verbose = require('./verbose.json');
 const fs = require("fs");
 
 // initialize database tables
 db.sequelize.sync();
-sequelize_fixtures.loadFile('./config/fixtures.json', db);
+fixtures.execute();
 
 // Initialize Discord Bot
 const MODULES_DIR = "modules";
