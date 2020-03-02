@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
 	const Player = sequelize.define('Player', {
 		id: {
-			type: DataTypes.INTEGER,
+			type: DataTypes.STRING,
 			allowNull: false,
             primaryKey: true
         },
@@ -49,6 +49,14 @@ module.exports = (sequelize, DataTypes) => {
 		tableName: 'Player',
 		timestamps: false
     });
+
+    Player.associate = function(models) {
+        Player.belongsTo(models.Job)
+    };
+
+    Player.associate = function(models) {
+        Player.belongsToMany(models.Ability, {through: 'PlayerAbility'})
+    };
 
 	return Player;
 };
